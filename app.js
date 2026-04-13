@@ -183,6 +183,12 @@ function addDaysToDateString(dateStr, days) {
     return `${yyyy}-${mm}-${dd}`;
 }
 
+function isSundayDateString(dateStr) {
+    const [year, month, day] = String(dateStr).split('-').map(Number);
+    const utcDate = new Date(Date.UTC(year, month - 1, day));
+    return utcDate.getUTCDay() === 0;
+}
+
 function hhmmToMinutes(hhmm) {
     const [h, m] = String(hhmm).split(':').map(Number);
     return (h * 60) + m;
@@ -662,6 +668,12 @@ async function handleEvent(data) {
     const shiftInfo = getEmployeeShift(employeeId);
     const configuredShift = shiftInfo && SHIFT_RULES[shiftInfo.shiftKey] ? SHIFT_RULES[shiftInfo.shiftKey] : null;
     const shiftDate = configuredShift ? resolveShiftDateForEvent(eventTime, configuredShift) : formatDateInZone(eventTime);
+    if (configuredShift && isSundayDateString(shiftDate)) {
+        if (DIAG_EVENT_LINE) {
+            console.log(`↳ sunday shift ignored | id=${employeeId || '-'} | name=${employeeName || '-'} | shiftDate=${shiftDate}`);
+        }
+        return;
+    }
     const checkType = configuredShift ? classifyPunch(eventTime, statusRaw, configuredShift, shiftDate) : (statusRaw || 'access');
 
     db.prepare(`
@@ -811,11 +823,13 @@ async function handleEvent(data) {
 
 async function runNoShowCheck() {
     const now = new Date();
+    const today = formatDateInZone(now);
+    if (isSundayDateString(today)) return;
+
     for (const [employeeId, info] of Object.entries(EMPLOYEE_SHIFT_MAP)) {
         const shift = SHIFT_RULES[info.shiftKey];
         if (!shift) continue;
 
-        const today = formatDateInZone(now);
         const lateDeadline = makeShiftDateTime(today, shift.workStart, 0);
         lateDeadline.setMinutes(lateDeadline.getMinutes() + DIDNT_COME_AFTER_MIN);
         const finalCheckInCutoff = makeShiftDateTime(today, shift.validCheckInTo, 0);
