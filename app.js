@@ -24,6 +24,8 @@ const NO_SHOW_CHECK_INTERVAL_MS = 60000;
 const BREAK_LIMIT_MIN = 60;
 const ON_TIME_GRACE_MIN = 10;
 const DIDNT_COME_AFTER_MIN = 120;
+const VERY_LATE_AFTER_MIN = DIDNT_COME_AFTER_MIN + ON_TIME_GRACE_MIN;
+const BOT_CHECKIN_NOTIFICATIONS_FROM_HHMM = '14:00';
 // ===================================
 
 // ====== TELEGRAM ATTENDANCE ROUTING (OPTIONAL) ======
@@ -894,13 +896,22 @@ async function handleEvent(data) {
     `).get(employeeId, shiftDate);
 
     if (checkType === 'checkIn') {
+        const botCheckInNotificationsFromMin = hhmmToMinutes(BOT_CHECKIN_NOTIFICATIONS_FROM_HHMM);
+        if (getMinutesInZone(eventTime) < botCheckInNotificationsFromMin) {
+            if (DIAG_EVENT_LINE) {
+                console.log(
+                    `↳ early check-in ignored for bot notify | id=${employeeId || '-'} | name=${employeeName || '-'} | before=${BOT_CHECKIN_NOTIFICATIONS_FROM_HHMM}`
+                );
+            }
+            return;
+        }
         if (existingDay && existingDay.first_check_in_at) {
             return; // only first check-in should notify
         }
         const workStart = makeShiftDateTime(shiftDate, configuredShift.workStart, 0);
         const lateMin = minutesBetween(eventTime, workStart);
-        const lateFlag = lateMin > ON_TIME_GRACE_MIN && lateMin <= DIDNT_COME_AFTER_MIN;
-        const didntComeFlag = lateMin > DIDNT_COME_AFTER_MIN;
+        const lateFlag = lateMin > ON_TIME_GRACE_MIN && lateMin <= VERY_LATE_AFTER_MIN;
+        const didntComeFlag = lateMin > VERY_LATE_AFTER_MIN;
 
         db.prepare(`
           INSERT INTO daily_attendance (
@@ -925,7 +936,7 @@ async function handleEvent(data) {
 
         let header = '✅ <b>On-Time Check In</b>';
         if (lateFlag) header = '⏰ <b>Late Check In</b>';
-        if (didntComeFlag) header = '🚫 <b>Did Not Come (Very Late)</b>';
+        if (didntComeFlag) header = '🚫 <b>Very Late</b>';
         let msg = `${header}\n🏷 Shift: ${configuredShift.label}\n${baseMessage}`;
         if (didntComeFlag) msg += `\n🚫 Marked as: <b>Did Not Come</b>\n⏱ Late by: <b>${lateMin} min</b>`;
         else if (lateFlag) msg += `\n🚨 Late by: <b>${lateMin} min</b>`;
@@ -935,7 +946,7 @@ async function handleEvent(data) {
             timeLocal: timeStr,
             employeeId,
             employeeName,
-            action: didntComeFlag ? 'Did Not Come (Checked In >2h)' : (lateFlag ? 'Late Check In' : 'On-Time Check In'),
+            action: didntComeFlag ? `Did Not Come (Checked In >${VERY_LATE_AFTER_MIN}m)` : (lateFlag ? 'Late Check In' : 'On-Time Check In'),
             shiftTime: formatShiftTime(configuredShift),
             shiftDate,
             lateMinutes: lateMin,
@@ -986,7 +997,7 @@ async function runNoShowCheck() {
         if (!shift) continue;
 
         const lateDeadline = makeShiftDateTime(today, shift.workStart, 0);
-        lateDeadline.setMinutes(lateDeadline.getMinutes() + DIDNT_COME_AFTER_MIN);
+        lateDeadline.setMinutes(lateDeadline.getMinutes() + VERY_LATE_AFTER_MIN);
         const finalCheckInCutoff = makeShiftDateTime(today, shift.validCheckInTo, 0);
         const noShowAfter = lateDeadline > finalCheckInCutoff ? lateDeadline : finalCheckInCutoff;
         const checkOutCutoff = makeShiftDateTime(today, shift.validCheckOutTo, shift.checkOutDayOffset);
@@ -1015,7 +1026,7 @@ async function runNoShowCheck() {
             `🆔 ID: ${employeeId}\n` +
             `🏷 Shift: ${shift.label}\n` +
             `📅 Shift Date: ${today}\n` +
-            `⏱ No check-in received within ${DIDNT_COME_AFTER_MIN} minutes of shift start`,
+            `⏱ No check-in received within ${VERY_LATE_AFTER_MIN} minutes of shift start`,
             employeeId
         );
         await appendEventToGoogleSheet(buildSheetRow({
