@@ -45,7 +45,8 @@ const ATTENDANCE_CHAT_ROUTING = [
             'Farrux',
             'Lazizbek Leo',
             'Sardor',
-            'Azimjon'
+            'Azimjon',
+            'Suxrob'
         ]
     }
 ];
