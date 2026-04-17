@@ -38,7 +38,7 @@ const BOT_CHECKIN_NOTIFICATIONS_FROM_HHMM = '14:00';
 // ]
 const ATTENDANCE_CHAT_ROUTING = [
     {
-        chatId: '-5221080452',
+        chatId: '-1003963457390',
         employeeNames: [
             'Hasanboy',
             'Akbar Ramadan',
