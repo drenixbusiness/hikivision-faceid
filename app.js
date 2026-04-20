@@ -45,8 +45,7 @@ const ATTENDANCE_CHAT_ROUTING = [
             'Farrux',
             'Lazizbek Leo',
             'Sardor',
-            'Azimjon',
-            'Suxrob'
+            'Azimjon'
         ]
     }
 ];
@@ -235,7 +234,7 @@ function resolveAttendanceChatIds(employeeId, employeeName) {
     if (targetChatIds.size > 0) return Array.from(targetChatIds);
     // Fallback for non-routed employees is temporarily disabled.
     // Re-enable later by uncommenting the next line.
-    // return TELEGRAM_CHAT_ID ? [TELEGRAM_CHAT_ID] : [];
+    return TELEGRAM_CHAT_ID ? [TELEGRAM_CHAT_ID] : [];
     return [];
 }
 
