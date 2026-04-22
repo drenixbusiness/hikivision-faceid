@@ -118,27 +118,27 @@ const EMPLOYEE_SHIFT_MAP = {
 // Each employee uses their unique key in the Telegram bot to register and
 // receive personal attendance notifications. Change 'mykey123' per employee.
 const EMPLOYEE_SECRET_KEYS = {
-    '001':  'spenceritdep',
-    '18':   'abdulaziz26@',
-    '002':  'isaac26@',
-    '003':  'uks26@',
-    '004':  'akbar26@',
-    '0006': 'farrux26@',
-    '7':    'fayzulloh26@',
-    '8':    'diyor26@',
-    '9':    'fazliddin26@',
-    '10':   'asadbek26@',
-    '11':   'amirshoh26@',
-    '12':   'lazizbek26@',
-    '14':   'azizbek26@',
-    '19':   'jessica26@',
-    '24':   'sardor26@',
-    '27':   'nigora26@',
-    '20':   'humidullo26@',
-    '31':   'abdulloh26@',
-    '28':   'azimjon26@',
-    '32':   'zubayir26@',
-    '036':  'odina26@'
+    '001':  '4yB!isuxrs',
+    '18':   'byyDd5g@aa',
+    '002':  '#sFtgaays3',
+    '003':  'gh#ma9mTsw',
+    '004':  'agA8kb&vyk',
+    '0006': 'b9afrpiR&y',
+    '7':    'Wy!ahyf8nr',
+    '8':    'k!wir2Ydwy',
+    '9':    '2habzgfUc#',
+    '10':   '&y9Maefska',
+    '11':   'nq@ia4mMjr',
+    '12':   '!rlz2ajKkv',
+    '14':   'v4wbRi!raz',
+    '19':   'Fp@sjeh8cu',
+    '24':   'ms&yaMr2fr',
+    '27':   'g9n&rwiMyh',
+    '20':   'Cuywh5he@m',
+    '31':   '9smpds&Cba',
+    '28':   'r2ijdwaJz$',
+    '32':   'Jbdiuz9*ew',
+    '036':  'miadqo#D4a'
 };
 // ==================================
 // ================================================
